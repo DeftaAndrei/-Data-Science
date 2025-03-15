@@ -100,4 +100,11 @@ for i in range(trainingEpochs):
     myNeralNetwork.trainNetwork(x, y)
        
 
+myNeralNetwork.saveWeights()
+myNeralNetwork.predictOutput()
+
+plt.plot(myNeralNetwork.lossList)
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.show()
 
