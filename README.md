@@ -1,5 +1,6 @@
 Ex2 Eu nu m-am aptinut si am incercat sa fac 2 probleme ca daca tot am stat sa citesc atat de mult despre apache parquet si am gasit tot ce trebuia pe https://parquet.apache.org/ si pot sa zic ca m-am inspirat si dupa https://scikit-learn.org/stable/auto_examples/inspection/plot_linear_model_coefficient_interpretation.html#sphx-glr-auto-examples-inspection-plot-linear-model-coefficient-interpretation-py
    Pot  sa zic ca red ca mi-ar placea sa lucrez cu baze de datre intradevar cred ca pot sa ma situez la mid pentru inceput trebuie sa stau sa invat foarte multe dar cred ca voi puteti sa ma ghidati foarte bine in aceasta aventura
+   M-am mai inspirat https://stackoverflow.com/questions/52656972/how-can-i-open-a-snappy-parquet-file-in-python
 Acesta este biroul meu . Am devenit mult mai productiv decand am investit in ce iubesc sa fac 
 ![WhatsApp Image 2025-03-16 at 20 31 58_27d8945b](https://github.com/user-attachments/assets/834a5196-6f90-42e2-a1fe-0d0aea90b4c9)
 
