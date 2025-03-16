@@ -1,0 +1,429 @@
+import pandas as pd
+import numpy as np
+import pyarrow
+import matplotlib.pyplot as plt
+import seaborn as sns
+import tensorflow as tf
+from fuzzywuzzy import fuzz
+from tensorflow.python.framework import ops
+import os
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import DBSCAN
+from sklearn.metrics import silhouette_score
+import re
+from tqdm import tqdm
+
+# Creăm directorul pentru rezultate
+os.makedirs("results", exist_ok=True)
+
+# Afișăm versiunea TensorFlow
+print("Versiunea TensorFlow:", tf.__version__)
+
+# Calea către fișierul parquet
+filename = "C:/Users/Andrei-RobertDEFTA/Desktop/Veridion/Entity/Tensorflow.parquet"
+
+# Încărcăm datele din fișierul parquet
+print("Încărcăm datele din fișierul parquet...")
+try:
+    df = pd.read_parquet(filename)
+    print("Date încărcate cu succes!")
+except Exception as e:
+    print(f"Eroare la încărcarea fișierului: {e}")
+    print("Încercăm să folosim fișierul veridion_entity_resolution_challenge.snappy.parquet")
+    filename = "C:/Users/Andrei-RobertDEFTA/Desktop/Veridion/Entity/veridion_entity_resolution_challenge.snappy.parquet"
+    df = pd.read_parquet(filename)
+    print("Date încărcate cu succes din fișierul alternativ!")
+
+# Afișăm informații despre date
+print("\n=== INFORMAȚII DESPRE DATE ===")
+print(f"Număr de înregistrări: {len(df)}")
+print(f"Coloane disponibile: {', '.join(df.columns)}")
+
+# Verificăm valorile lipsă
+print("\nValori lipsă în fiecare coloană:")
+print(df.isnull().sum())
+
+# Afișăm primele 5 rânduri
+print("\nPrimele 5 înregistrări:")
+print(df.head())
+
+# Funcție pentru preprocesarea textului
+def preprocess_text(text):
+   
+    if pd.isna(text):
+        return ""
+    
+    # Convertim la lowercase
+    text = str(text).lower()
+    
+    # Eliminăm caracterele speciale și numerele
+    text = re.sub(r'[^a-zA-Z\s]', ' ', text)
+    
+    # Eliminăm spațiile multiple
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    return text
+
+# Identificăm coloanele relevante pentru identificarea companiilor
+text_columns = ['name', 'company_name', 'address', 'city', 'country', 'phone', 'website', 'email']
+available_columns = [col for col in text_columns if col in df.columns]
+
+print(f"\nColoane disponibile pentru analiză: {', '.join(available_columns)}")
+
+# Preprocesăm datele
+print("\nPreprocesăm datele...")
+
+# Preprocesăm coloanele text
+for col in available_columns:
+    if col in df.columns:
+        print(f"Preprocesăm coloana {col}...")
+        df[f'processed_{col}'] = df[col].apply(preprocess_text)
+
+# Combinăm coloanele preprocesate într-o singură coloană pentru analiză
+print("Combinăm coloanele preprocesate...")
+df['combined_text'] = ''
+for col in available_columns:
+    if f'processed_{col}' in df.columns:
+        df['combined_text'] += df[f'processed_{col}'] + ' '
+df['combined_text'] = df['combined_text'].str.strip()
+
+# Calculăm similaritatea între înregistrări folosind TensorFlow
+print("\n=== CALCULĂM SIMILARITATEA ÎNTRE ÎNREGISTRĂRI ===")
+
+# Funcție pentru a calcula similaritatea Jaccard între două texte
+def jaccard_similarity(text1, text2):
+
+    set1 = set(text1.split())
+    set2 = set(text2.split())
+    
+    if not set1 or not set2:
+        return 0.0
+    
+    intersection = len(set1.intersection(set2))
+    union = len(set1) + len(set2) - intersection
+    
+    return intersection / union if union > 0 else 0.0
+
+# Funcție pentru a calcula similaritatea fuzzy între două texte
+def fuzzy_similarity(text1, text2):
+   
+    return fuzz.token_sort_ratio(text1, text2) / 100.0
+
+# Creăm un model TensorFlow pentru a calcula embeddings pentru texte
+print("Creăm un model TensorFlow pentru embeddings...")
+
+# Definim vocabularul (cuvintele unice din toate textele)
+all_words = set()
+for text in df['combined_text']:
+    all_words.update(text.split())
+
+vocab_size = len(all_words)
+print(f"Dimensiunea vocabularului: {vocab_size}")
+
+# Creăm un dicționar pentru a mapa cuvintele la indici
+word_to_index = {word: i for i, word in enumerate(all_words)}
+
+# Funcție pentru a converti un text la o secvență de indici
+def text_to_indices(text, max_length=100):
+    
+    words = text.split()
+    indices = [word_to_index.get(word, 0) for word in words[:max_length]]
+    # Padding
+    indices = indices + [0] * (max_length - len(indices))
+    return indices
+
+# Convertim textele la secvențe de indici
+print("Convertim textele la secvențe de indici...")
+max_seq_length = 100
+text_indices = np.array([text_to_indices(text, max_seq_length) for text in df['combined_text']])
+
+# Creăm un model de embedding
+embedding_dim = 50
+embedding_model = tf.keras.Sequential([
+    tf.keras.layers.Embedding(vocab_size + 1, embedding_dim, input_length=max_seq_length),
+    tf.keras.layers.GlobalAveragePooling1D()
+])
+
+# Convertim secvențele de indici la tensori TensorFlow
+text_indices_tensor = tf.convert_to_tensor(text_indices, dtype=tf.int32)
+
+# Obținem embeddings pentru texte
+print("Obținem embeddings pentru texte...")
+embeddings = embedding_model(text_indices_tensor).numpy()
+
+# Normalizăm embeddings
+scaler = StandardScaler()
+embeddings_scaled = scaler.fit_transform(embeddings)
+
+# Reducem dimensionalitatea pentru vizualizare
+print("Reducem dimensionalitatea pentru vizualizare...")
+pca = PCA(n_components=4)  # Creștem la 4 componente pentru pairplot
+embeddings_reduced = pca.fit_transform(embeddings_scaled)
+
+# Creăm un DataFrame pentru vizualizare
+viz_df = pd.DataFrame(
+    embeddings_reduced, 
+    columns=['COMP1', 'COMP2', 'COMP3', 'COMP4']
+)
+
+# Adăugăm o coloană pentru lungimea textului (similar cu WAGE din exemplu)
+viz_df['TEXT_LENGTH'] = df['combined_text'].apply(len)
+
+# Adăugăm o coloană pentru numărul de cuvinte (similar cu EDUCATION din exemplu)
+viz_df['WORD_COUNT'] = df['combined_text'].apply(lambda x: len(x.split()))
+
+# Adăugăm o coloană pentru numărul de caractere unice (similar cu EXPERIENCE din exemplu)
+viz_df['UNIQUE_CHARS'] = df['combined_text'].apply(lambda x: len(set(x)))
+
+# Adăugăm o coloană pentru lungimea medie a cuvintelor (similar cu AGE din exemplu)
+viz_df['AVG_WORD_LEN'] = df['combined_text'].apply(lambda x: np.mean([len(w) for w in x.split()]) if len(x.split()) > 0 else 0)
+
+# Creăm un pairplot similar cu cel din exemplu
+print("\n=== GENERĂM PAIRPLOT PENTRU VIZUALIZAREA DATELOR ===")
+plt.figure(figsize=(14, 12))
+
+# Selectăm coloanele pentru pairplot
+pairplot_columns = ['TEXT_LENGTH', 'WORD_COUNT', 'UNIQUE_CHARS', 'AVG_WORD_LEN']
+
+# Creăm un DataFrame pentru pairplot
+train_dataset = viz_df[pairplot_columns].copy()
+
+# Adăugăm o coloană pentru KIND (similar cu exemplul)
+train_dataset.insert(0, "KIND", "COMP")
+
+# Generăm pairplot
+sns_pairplot = sns.pairplot(train_dataset, kind="reg", diag_kind="kde")
+plt.suptitle('Pairplot al caracteristicilor textuale ale companiilor', y=1.02, fontsize=16)
+plt.tight_layout()
+plt.savefig("results/pairplot_caracteristici.png", dpi=300, bbox_inches='tight')
+print("Pairplot-ul a fost salvat în 'results/pairplot_caracteristici.png'")
+
+# Aplicăm clustering DBSCAN pentru a identifica grupuri de companii similare
+print("\n=== IDENTIFICĂM GRUPURI DE COMPANII SIMILARE ===")
+
+# Funcție pentru a găsi parametrii optimi pentru DBSCAN
+def find_optimal_dbscan_params(embeddings, eps_range=(0.1, 0.5, 0.1), min_samples_range=(2, 10, 2)):
+    """
+    Găsește parametrii optimi pentru DBSCAN
+    
+    Args:
+        embeddings (ndarray): Matricea de embeddings
+        eps_range (tuple): Intervalul pentru eps (start, stop, step)
+        min_samples_range (tuple): Intervalul pentru min_samples (start, stop, step)
+        
+    Returns:
+        tuple: (eps_optim, min_samples_optim, score_optim)
+    """
+    best_score = -1
+    best_eps = 0
+    best_min_samples = 0
+    
+    eps_values = np.arange(eps_range[0], eps_range[1], eps_range[2])
+    min_samples_values = range(min_samples_range[0], min_samples_range[1], min_samples_range[2])
+    
+    for eps in eps_values:
+        for min_samples in min_samples_values:
+            dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+            clusters = dbscan.fit_predict(embeddings)
+            
+            # Verificăm dacă avem cel puțin 2 clustere
+            if len(set(clusters)) < 2:
+                continue
+            
+            # Calculăm scorul silhouette
+            try:
+                score = silhouette_score(embeddings, clusters)
+                if score > best_score:
+                    best_score = score
+                    best_eps = eps
+                    best_min_samples = min_samples
+            except:
+                continue
+    
+    return best_eps, best_min_samples, best_score
+
+# Găsim parametrii optimi pentru DBSCAN
+print("Găsim parametrii optimi pentru DBSCAN...")
+eps_optim, min_samples_optim, score_optim = find_optimal_dbscan_params(embeddings_scaled)
+print(f"Parametri optimi: eps={eps_optim}, min_samples={min_samples_optim}, score={score_optim}")
+
+# Dacă nu am găsit parametri optimi, folosim valori implicite
+if eps_optim == 0:
+    eps_optim = 0.3
+    min_samples_optim = 2
+    print(f"Folosim parametri impliciți: eps={eps_optim}, min_samples={min_samples_optim}")
+
+# Aplicăm DBSCAN cu parametrii optimi
+dbscan = DBSCAN(eps=eps_optim, min_samples=min_samples_optim)
+clusters = dbscan.fit_predict(embeddings_scaled)
+
+# Adăugăm etichetele de cluster la DataFrame
+df['cluster'] = clusters
+viz_df['cluster'] = clusters
+
+# Afișăm statistici despre clustere
+n_clusters = len(set(clusters)) - (1 if -1 in clusters else 0)
+n_noise = list(clusters).count(-1)
+print(f"Număr de clustere identificate: {n_clusters}")
+print(f"Număr de înregistrări considerate zgomot (companii unice): {n_noise}")
+
+# Afișăm distribuția dimensiunilor clusterelor
+cluster_sizes = pd.Series(clusters).value_counts().sort_index()
+print("\nDistribuția dimensiunilor clusterelor:")
+print(cluster_sizes)
+
+# Vizualizăm clusterele în pairplot
+print("\n=== GENERĂM PAIRPLOT CU CLUSTERE ===")
+plt.figure(figsize=(14, 12))
+
+# Adăugăm clusterul ca o coloană în DataFrame-ul pentru pairplot
+train_dataset['cluster'] = clusters
+
+# Generăm pairplot cu clustere
+sns_pairplot_clusters = sns.pairplot(
+    train_dataset, 
+    hue='cluster', 
+    palette='viridis',
+    diag_kind="kde"
+)
+plt.suptitle('Pairplot al caracteristicilor textuale cu clustere', y=1.02, fontsize=16)
+plt.tight_layout()
+plt.savefig("results/pairplot_clustere.png", dpi=300, bbox_inches='tight')
+print("Pairplot-ul cu clustere a fost salvat în 'results/pairplot_clustere.png'")
+
+# Vizualizăm clusterele în spațiul 2D
+plt.figure(figsize=(12, 10))
+scatter = plt.scatter(embeddings_reduced[:, 0], embeddings_reduced[:, 1], c=clusters, cmap='viridis', alpha=0.5)
+plt.colorbar(scatter, label='Cluster')
+plt.title('Clustere de companii similare')
+plt.xlabel('Componenta principală 1')
+plt.ylabel('Componenta principală 2')
+plt.tight_layout()
+plt.savefig("results/clustere_companii.png")
+print("Clusterele de companii au fost salvate în 'results/clustere_companii.png'")
+
+# Funcție pentru a genera un ID unic pentru fiecare companie
+def generate_company_id(row):
+    """
+    Generează un ID unic pentru fiecare companie
+    
+    Args:
+        row: Rândul din DataFrame
+        
+    Returns:
+        str: ID-ul companiei
+    """
+    if row['cluster'] == -1:
+        # Companie unică
+        return f"COMP_{row.name}"
+    else:
+        # Companie parte dintr-un cluster
+        return f"COMP_CLUSTER_{row['cluster']}"
+
+# Generăm ID-uri unice pentru companii
+print("\n=== GENERĂM ID-URI UNICE PENTRU COMPANII ===")
+df['company_id'] = df.apply(generate_company_id, axis=1)
+
+# Grupăm înregistrările după ID-ul companiei
+print("Grupăm înregistrările după ID-ul companiei...")
+
+# Identificăm coloanele pentru agregare
+agg_columns = {}
+for col in df.columns:
+    if col not in ['cluster', 'company_id', 'combined_text'] and not col.startswith('processed_'):
+        agg_columns[col] = lambda x: list(set([str(i) for i in x if not pd.isna(i)]))
+
+# Grupăm înregistrările
+grouped_df = df.groupby('company_id').agg(agg_columns).reset_index()
+
+# Adăugăm o coloană cu numărul de înregistrări grupate
+grouped_df['num_records'] = grouped_df['company_id'].apply(lambda x: sum(df['company_id'] == x))
+
+# Afișăm statistici despre grupare
+print(f"\nNumăr de companii unice identificate: {len(grouped_df)}")
+print(f"Număr de companii cu înregistrări multiple: {sum(grouped_df['num_records'] > 1)}")
+print(f"Număr maxim de înregistrări pentru o companie: {grouped_df['num_records'].max()}")
+
+# Afișăm primele 5 companii grupate
+name_col = 'name' if 'name' in grouped_df.columns else 'company_name'
+if name_col in grouped_df.columns:
+    print("\nPrimele 5 companii grupate:")
+    print(grouped_df[['company_id', name_col, 'num_records']].head())
+
+# Vizualizăm distribuția numărului de înregistrări per companie
+plt.figure(figsize=(10, 6))
+sns.histplot(grouped_df['num_records'], bins=20)
+plt.title('Distribuția numărului de înregistrări per companie')
+plt.xlabel('Număr de înregistrări')
+plt.ylabel('Frecvență')
+plt.tight_layout()
+plt.savefig("results/distributie_inregistrari_per_companie.png")
+print("Distribuția numărului de înregistrări per companie a fost salvată în 'results/distributie_inregistrari_per_companie.png'")
+
+# Vizualizăm top 10 companii cu cele mai multe înregistrări duplicate
+plt.figure(figsize=(12, 6))
+top_companies = grouped_df.nlargest(10, 'num_records')
+sns.barplot(x='num_records', y=name_col, data=top_companies)
+plt.title('Top 10 companii cu cele mai multe înregistrări duplicate')
+plt.xlabel('Număr de înregistrări')
+plt.ylabel('Companie')
+plt.tight_layout()
+plt.savefig("results/top_companii_duplicate.png")
+print("Top 10 companii cu cele mai multe înregistrări duplicate a fost salvat în 'results/top_companii_duplicate.png'")
+
+# Salvăm rezultatele
+output_file = "results/grouped_companies.csv"
+print(f"\nSalvăm rezultatele în {output_file}...")
+grouped_df.to_csv(output_file, index=False)
+
+# Salvăm și DataFrame-ul original cu ID-urile de companie
+output_file_original = "results/companies_with_ids.csv"
+print(f"Salvăm DataFrame-ul original cu ID-urile de companie în {output_file_original}...")
+df.to_csv(output_file_original, index=False)
+
+# Exemplu de vizualizare a clusterelor (pentru clustere mici)
+def visualize_small_clusters(df, max_clusters=5, max_items_per_cluster=5):
+    """
+    Vizualizează câteva clustere mici pentru verificare
+    
+    Args:
+        df (DataFrame): DataFrame-ul cu datele
+        max_clusters (int): Numărul maxim de clustere de vizualizat
+        max_items_per_cluster (int): Numărul maxim de înregistrări per cluster
+    """
+    print("\n=== EXEMPLE DE CLUSTERE ===")
+    
+    # Selectăm clustere cu mai mult de o înregistrare, dar nu prea multe
+    valid_clusters = df[df['cluster'] != -1]['cluster'].value_counts()
+    valid_clusters = valid_clusters[(valid_clusters > 1) & (valid_clusters <= 10)].index.tolist()
+    
+    if not valid_clusters:
+        print("Nu există clustere valide pentru vizualizare.")
+        return
+    
+    # Limitează numărul de clustere
+    valid_clusters = valid_clusters[:max_clusters]
+    
+    name_col = 'name' if 'name' in df.columns else 'company_name'
+    
+    for cluster_id in valid_clusters:
+        print(f"\nCluster {cluster_id}:")
+        cluster_items = df[df['cluster'] == cluster_id]
+        
+        # Limitează numărul de înregistrări per cluster
+        for idx, row in cluster_items.head(max_items_per_cluster).iterrows():
+            if 'city' in df.columns and 'country' in df.columns:
+                print(f"  - {row[name_col]} ({row['city']}, {row['country']})")
+            else:
+                print(f"  - {row[name_col]}")
+        
+        if len(cluster_items) > max_items_per_cluster:
+            print(f"  ... și alte {len(cluster_items) - max_items_per_cluster} înregistrări")
+
+# Vizualizăm câteva clustere mici
+visualize_small_clusters(df)
+
+print("\nProcesul de analiză a fost finalizat cu succes!")
+
+
