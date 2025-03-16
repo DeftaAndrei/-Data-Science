@@ -2,6 +2,11 @@ Ex2 Eu nu m-am aptinut si am incercat sa fac 2 probleme ca daca tot am stat sa c
 
 ![WhatsApp Image 2025-03-16 at 20 24 34_22f0c859](https://github.com/user-attachments/assets/2b3c9c7d-fc61-4774-8167-137df5d7b093)
 
+
+
+Acesta este biroul meu . Am devenit mult mai productiv decand am investit in ce iubesc sa fac 
+![WhatsApp Image 2025-03-16 at 20 31 58_27d8945b](https://github.com/user-attachments/assets/834a5196-6f90-42e2-a1fe-0d0aea90b4c9)
+
 # Potrivirea și gruparea site-urilor web în funcție de similitudinea logourilor
 
 Acest proiect implementează o soluție pentru potrivirea și gruparea site-urilor web în funcție de similitudinea logourilor lor. Soluția utilizează mai multe abordări pentru a extrage caracteristicile logourilor și a le grupa, inclusiv tehnici tradiționale de procesare a imaginilor și tehnici de învățare profundă.
