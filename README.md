@@ -1,3 +1,7 @@
+Ex2 Eu nu m-am aptinut si am incercat sa fac 2 probleme ca daca tot am stat sa citesc atat de mult despre apache parquet si am gasit tot ce trebuia pe https://parquet.apache.org/ si pot sa zic ca m-am inspirat si dupa https://scikit-learn.org/stable/auto_examples/inspection/plot_linear_model_coefficient_interpretation.html#sphx-glr-auto-examples-inspection-plot-linear-model-coefficient-interpretation-py
+
+![WhatsApp Image 2025-03-16 at 20 24 34_22f0c859](https://github.com/user-attachments/assets/2b3c9c7d-fc61-4774-8167-137df5d7b093)
+
 # Potrivirea și gruparea site-urilor web în funcție de similitudinea logourilor
 
 Acest proiect implementează o soluție pentru potrivirea și gruparea site-urilor web în funcție de similitudinea logourilor lor. Soluția utilizează mai multe abordări pentru a extrage caracteristicile logourilor și a le grupa, inclusiv tehnici tradiționale de procesare a imaginilor și tehnici de învățare profundă.
@@ -131,6 +135,13 @@ Soluția este proiectată pentru a fi scalabilă:
 - Implementarea unei interfețe web pentru vizualizarea rezultatelor
 - Utilizarea tehnicilor de augmentare a datelor pentru a îmbunătăți robustețea
 
-## Autor
+
+  O sa va pun o poza pentru cel de-al doilea proiect
+  ![image](https://github.com/user-attachments/assets/8cbc9d90-8877-4079-a2a1-8d70626bea08)
+  
+
+
+## Autor Defta Andrei Robert
+Va multumesc daca ati ajuns pana aici 
 
 Acest proiect a fost dezvoltat ca parte a procesului de recrutare pentru Veridion. 
