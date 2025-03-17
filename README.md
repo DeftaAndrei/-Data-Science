@@ -1,3 +1,10 @@
+
+Acum incerc sa folosesc niste API pentru creerea unor chatboti personalizatii pe comanda . Vreau sa o intergrez in proiectele mele personale 
+Imi place sa fac proiecte mari da vreau sa fac ceva de 100 de ori mai mare ca pana acum 
+
+
+
+
 Ex2 Eu nu m-am aptinut si am incercat sa fac 2 probleme ca daca tot am stat sa citesc atat de mult despre apache parquet si am gasit tot ce trebuia pe https://parquet.apache.org/ si pot sa zic ca m-am inspirat si dupa https://scikit-learn.org/stable/auto_examples/inspection/plot_linear_model_coefficient_interpretation.html#sphx-glr-auto-examples-inspection-plot-linear-model-coefficient-interpretation-py
    Pot  sa zic ca red ca mi-ar placea sa lucrez cu baze de datre intradevar cred ca pot sa ma situez la mid pentru inceput trebuie sa stau sa invat foarte multe dar cred ca voi puteti sa ma ghidati foarte bine in aceasta aventura
    M-am mai inspirat https://stackoverflow.com/questions/52656972/how-can-i-open-a-snappy-parquet-file-in-python
@@ -57,33 +64,29 @@ pip install pandas numpy pillow scikit-learn matplotlib opencv-python torch torc
 
 2. Pentru a inspecta structura fișierului parquet:
 
-```bash
+""
 python inspect_parquet.py
 ```
-
 3. Pentru a rula abordarea tradițională:
 
-```bash
+
 python logo_matcher.py
 ```
 
 4. Pentru a rula abordarea de învățare profundă:
 
-```bash
+
 python deep_logo_matcher.py
-```
+
 
 5. Pentru a rula abordarea ensemble:
 
-```bash
+
 python ensemble_logo_matcher.py
-```
+
 
 6. Pentru a rula toate abordările și a compara rezultatele:
 
-```bash
-python run_all.py
-```
 
 ## Rezultate
 
