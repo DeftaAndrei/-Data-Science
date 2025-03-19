@@ -143,6 +143,19 @@ Soluția este proiectată pentru a fi scalabilă:
 
   O sa va pun o poza pentru cel de-al doilea proiect
   ![image](https://github.com/user-attachments/assets/8cbc9d90-8877-4079-a2a1-8d70626bea08)
+
+
+ Vizualizarea datelor la problema Company Classifier 
+  ![image](https://github.com/user-attachments/assets/8c9c804b-8b34-45db-a893-1aea7cbf31e2)
+  
+![image](https://github.com/user-attachments/assets/a8dd33e9-0663-40d5-a0c1-945bf8e52ce2)
+![image](https://github.com/user-attachments/assets/1afbecee-ff6a-40d1-9f12-a975714779a4)
+![image](https://github.com/user-attachments/assets/43a87428-cf9e-42dd-b8a1-005ea29b9651)
+![image](https://github.com/user-attachments/assets/4b36c4ae-1c2e-4429-8a08-2fafff1e89d4)
+
+
+
+
   
 
 
