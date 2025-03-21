@@ -3,6 +3,11 @@ Acum incerc sa folosesc niste API pentru creerea unor chatboti personalizatii pe
 Imi place sa fac proiecte mari da vreau sa fac ceva de 100 de ori mai mare ca pana acum 
 
 
+2 Company Classifier
+![image](https://github.com/user-attachments/assets/7a9a6512-80ca-40f4-a33a-7dc9aa8f2eb2)
+
+
+
 
 
 Ex2 Eu nu m-am aptinut si am incercat sa fac 2 probleme ca daca tot am stat sa citesc atat de mult despre apache parquet si am gasit tot ce trebuia pe https://parquet.apache.org/ si pot sa zic ca m-am inspirat si dupa https://scikit-learn.org/stable/auto_examples/inspection/plot_linear_model_coefficient_interpretation.html#sphx-glr-auto-examples-inspection-plot-linear-model-coefficient-interpretation-py
