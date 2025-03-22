@@ -1,3 +1,5 @@
+https://scikit-learn.org/stable/modules/svm.html
+
 
 Acum incerc sa folosesc niste API pentru creerea unor chatboti personalizatii pe comanda . Vreau sa o intergrez in proiectele mele personale 
 Imi place sa fac proiecte mari da vreau sa fac ceva de 100 de ori mai mare ca pana acum 
