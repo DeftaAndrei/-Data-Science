@@ -1,4 +1,4 @@
-# Sa recumosc nu am scris tot din cap ma bazez mult pe niste siteri si articole dupa google Academic 
+# Sa recumosc nu am scris tot din cap ma bazez mult pe niste site-uri si articole dupa google Academic 
 # si am facut un model de clasificare a companiilor in functie de caracteristicile lor
 
 import pandas as pd
