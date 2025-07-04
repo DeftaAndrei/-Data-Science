@@ -170,4 +170,4 @@ Soluția este proiectată pentru a fi scalabilă:
 ## Autor Defta Andrei Robert
 Va multumesc daca ati ajuns pana aici 
 
-Acest proiect a fost dezvoltat ca parte a procesului de recrutare pentru Veridion. 
+Acest proiect a fost dezvoltat din pasiune :))) 
