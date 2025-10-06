@@ -1,8 +1,7 @@
 https://scikit-learn.org/stable/modules/svm.html
 
 
-Acum incerc sa folosesc niste API pentru creerea unor chatboti personalizatii pe comanda . Vreau sa o intergrez in proiectele mele personale 
-Imi place sa fac proiecte mari da vreau sa fac ceva de 100 de ori mai mare ca pana acum 
+Acum incerc sa folosesc niste API pentru creerea unor chatboti personalizatii pe comanda .
 Va rog frumos sa imi dati feedback la tot ce am facut chiar am stat mult ca imi placea ca pot sa aplic librarii din cartea de mai jos , dar una din dorintele mele e sa fac analiza datelor . Problemele astea lu-am luat foarte personal am stat foarte mult pana le-am inteles si a trebuit sa invat ca sa pot sa le rezov , ca sa aplic orice am in cap trebuie sa ma documentez nu pot sa public un cod pe care nu il inteleg 
 A da si cred ca pot sa fac 4 sau 5 probleme trebuie sa imi acordati decat timp
 
@@ -171,3 +170,4 @@ Soluția este proiectată pentru a fi scalabilă:
 Va multumesc daca ati ajuns pana aici 
 
 Acest proiect a fost dezvoltat din pasiune :))) 
+
